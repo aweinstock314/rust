@@ -164,6 +164,15 @@ impl<I: Idx, T> IndexVec<I, T> {
     pub fn truncate(&mut self, a: usize) {
         self.raw.truncate(a)
     }
+
+    pub fn get<'a>(&'a self, index: I) -> Option<&'a T> {
+        self.raw.get(index.index())
+    }
+
+    #[inline]
+    pub fn get_mut<'a>(&'a mut self, index: I) -> Option<&'a mut T> {
+        self.raw.get_mut(index.index())
+    }
 }
 
 impl<I: Idx, T> Index<I> for IndexVec<I, T> {
