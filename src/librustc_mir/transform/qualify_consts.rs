@@ -114,18 +114,6 @@ impl fmt::Display for Mode {
     }
 }
 
-pub fn is_const_fn(tcx: TyCtxt, def_id: DefId) -> bool {
-    if let Some(node_id) = tcx.map.as_local_node_id(def_id) {
-        if let Some(fn_like) = FnLikeNode::from_node(tcx.map.get(node_id)) {
-            fn_like.constness() == hir::Constness::Const
-        } else {
-            false
-        }
-    } else {
-        tcx.sess.cstore.is_const_fn(def_id)
-    }
-}
-
 struct Qualifier<'a, 'gcx: 'a+'tcx, 'tcx: 'a> {
     mode: Mode,
     span: Span,
@@ -787,7 +775,7 @@ impl<'a, 'tcx> Visitor<'tcx> for Qualifier<'a, 'tcx, 'tcx> {
                 ty::TyFnDef(def_id, _, f) => {
                     (f.abi == Abi::PlatformIntrinsic &&
                      self.tcx.item_name(def_id).as_str().starts_with("simd_shuffle"),
-                     is_const_fn(self.tcx, def_id))
+                     self.tcx.is_const_fn(def_id))
                 }
                 _ => (false, false)
             };
@@ -981,7 +969,7 @@ impl<'tcx> MirPass<'tcx> for QualifyAndPromoteConstants {
         let def_id = tcx.map.local_def_id(id);
         let mode = match src {
             MirSource::Fn(_) => {
-                if is_const_fn(tcx, def_id) {
+                if tcx.is_const_fn(def_id) {
                     Mode::ConstFn
                 } else {
                     Mode::Fn
