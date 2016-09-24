@@ -170,7 +170,7 @@ impl<I: Idx, T> IndexVec<I, T> {
     }
 
     #[inline]
-    pub fn get_mut<'a>(&'a mut self, index: I) -> Option<&'a mut T> {
+    pub fn get_mut(&mut self, index: I) -> Option<&mut T> {
         self.raw.get_mut(index.index())
     }
 }
